@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>看台 The Stand</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="stage">
+  <aside class="intro">
+    <header class="intro-head">
+      <h1>看台 <em>The Stand</em></h1>
+      <p class="intro-sub">直播间互动机制原型 · TikTok / 抖音</p>
+    </header>
+
+    <div class="intro-steps">
+      <div class="intro-step">
+        <span class="idx">01</span>
+        <div class="body">
+          <h3>背景与问题</h3>
+          <p>进入赛事、游戏等高人气直播间后，用户往往有强烈的讨论和表达欲，但评论刷新过快，发言很快被淹没。用户难以看清彼此的评论和形成持续的讨论与互动，用户状态相对孤立。</p>
+        </div>
+      </div>
+
+      <div class="intro-step">
+        <span class="idx">02</span>
+        <div class="body">
+          <h3>用户</h3>
+          <p>高热直播间中，有讨论意愿，却因公屏过快而放弃表达的普通观众。</p>
+        </div>
+      </div>
+
+      <div class="intro-step">
+        <span class="idx">03</span>
+        <div class="body">
+          <h3>Idea</h3>
+          <p>将有讨论意愿的观众临时放进更小、更低速的实时讨论区，让彼此更容易看见和接话。</p>
+        </div>
+      </div>
+
+
+      <div class="intro-step">
+        <span class="idx">04</span>
+        <div class="body">
+          <h3>Demo 三幕</h3>
+          <p><b>被淹没</b> — 你在公屏发了一句，几秒就被刷走。</p>
+          <p><b>被捞起</b> — 评论离开视野的那一刻，旁边出现：<span class="intro-quote">有人也在聊「这波团」 ›</span></p>
+          <p><b>聊起来</b> — 点进看台，节奏慢下来，有人回复你：<span class="intro-quote">@你 对，辅助扫描刚交掉。</span></p>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="phone">
+    <div class="screen" id="screen">
+
+      <!-- 直播间底图（真实截图：仅含状态栏时间/信号 + 中部游戏画面），base64 内嵌不丢失 -->
+      <div class="live-photo"></div>
+      <div class="photo-fade"></div>
+
+      <!-- 主播条 + 直播间信息（独立图层，叠在底图上方） -->
+      <div class="anchor-strip"></div>
+
+      <!-- 关闭按钮（叠在真图上，保留可交互位） -->
+      <button class="photo-close" aria-label="关闭">✕</button>
+
+      <!-- 榜单行（真图缺，叠加在主播条下方的空当） -->
+      <div class="rank-row">
+        <span class="chip">赛事热度榜第 1 名</span>
+        <span class="chip">季后赛专题</span>
+        <span class="chip chip-go">直播广场 ›</span>
+      </div>
+
+      <!-- 活动条（真图缺，叠加） -->
+      <div class="promo-row">
+        <div class="promo-imgs">
+          <div class="promo-card promo-card--wide">
+            <span class="pc-time" id="promoTime1">00:57</span>
+          </div>
+          <div class="promo-card promo-card--sq">
+            <span class="pc-time" id="promoTime2">00:07</span>
+          </div>
+        </div>
+        <div class="promo-charge"></div>
+      </div>
+
+      <!-- 送礼区：独立固定层，礼物从左滑入、堆叠、渐隐 -->
+      <div class="gift-area" id="giftArea"></div>
+
+      <!-- 公屏 -->
+      <section class="feed">
+        <div class="feed-list" id="mainCrowd"></div>
+      </section>
+
+      <!-- 进场横幅：独立层，固定在礼物区上方的空白带 -->
+      <div class="join-banner" id="joinBanner"></div>
+
+      <!-- 内容预览条（方案 E） -->
+      <button class="peek" id="peek">
+        <span class="peek-zone"><i class="peek-dot"></i><span id="peekZone">12 区</span>正在聊</span>
+        <span class="peek-line" id="peekLine"></span>
+        <span class="peek-go">›</span>
+      </button>
+
+      <!-- 分享气泡：收到回复并退出后提示"看台入口收进了分享里" -->
+      <div class="share-hint" id="shareHint" aria-hidden="true">
+        看台入口收进这里了
+        <i class="sh-arrow"></i>
+      </div>
+
+      <!-- 底部操作条 -->
+      <div class="dock" id="dock">
+        <div class="dock-normal">
+          <button class="dock-input" id="dockInput">
+            <span>说点什么…</span><i class="di-emoji has-img"></i>
+          </button>
+          <button class="dock-ico has-img ico-heart" aria-label="点赞"></button>
+          <button class="dock-ico dock-gift has-img ico-gift" aria-label="礼物"></button>
+          <button class="dock-ico dock-share has-img ico-share" id="openMore" aria-label="更多"></button>
+        </div>
+        <div class="dock-typing">
+          <div class="typing-input-row">
+            <div class="live-input-wrap">
+              <input class="live-input" id="liveInput" type="text" autocomplete="off"
+                     placeholder="说点什么…" maxlength="60">
+            </div>
+            <button class="live-send" id="liveSend">发送</button>
+          </div>
+          <div class="typing-tools">
+            <div class="tt-left">
+              <span class="tt-emoji">🤣</span>
+              <span class="tt-emoji">🐶</span>
+              <span class="tt-emoji">🫰</span>
+              <span class="tt-emoji tt-emoji--badge">🥺</span>
+            </div>
+            <div class="tt-right">
+              <span class="tt-ico" aria-label="@">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M16 12v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1"/></svg>
+              </span>
+              <span class="tt-ico" aria-label="AI">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><path d="M10 14l2-5 2 5M10.7 12.6h2.6"/><path d="M4 9c-1 2-1 4 0 6M20 9c1 2 1 4 0 6" stroke-linecap="round"/></svg>
+              </span>
+              <span class="tt-ico" aria-label="表情">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r=".8" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r=".8" fill="currentColor" stroke="none"/><path d="M8.5 14.5c1 1.2 2.2 1.8 3.5 1.8s2.5-.6 3.5-1.8" stroke-linecap="round"/></svg>
+              </span>
+              <span class="tt-divider"></span>
+              <span class="tt-ico" aria-label="更多">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8" stroke-linecap="round"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-bar"></div>
+
+      <!-- 模拟系统键盘（点"说点什么"后升起） -->
+      <div class="keyboard" id="keyboard" aria-hidden="true">
+        <div class="kb-suggest">
+          <div class="kb-suggest-list">
+            <span>我</span><span>你</span><span>好</span><span>那</span><span>这</span><span>但</span><span>哈</span><span>这个</span><span>然后</span>
+          </div>
+          <span class="kb-suggest-more">⌄</span>
+        </div>
+        <div class="kb-rows">
+          <div class="kb-row"><i>q</i><i>w</i><i>e</i><i>r</i><i>t</i><i>y</i><i>u</i><i>i</i><i>o</i><i>p</i></div>
+          <div class="kb-row kb-row-indent"><i>a</i><i>s</i><i>d</i><i>f</i><i>g</i><i>h</i><i>j</i><i>k</i><i>l</i></div>
+          <div class="kb-row">
+            <i class="kb-fn kb-fn-wide">⇧</i>
+            <i>z</i><i>x</i><i>c</i><i>v</i><i>b</i><i>n</i><i>m</i>
+            <i class="kb-fn kb-fn-wide">⌫</i>
+          </div>
+          <div class="kb-row kb-row-last">
+            <i class="kb-fn kb-fn-w">123</i>
+            <i class="kb-fn">☺</i>
+            <i class="kb-space">空格</i>
+            <i class="kb-fn kb-fn-w kb-return">发送</i>
+          </div>
+        </div>
+      </div>
+
+      <!-- 遮罩（更多面板 / 看台面板 点外部收起） -->
+      <div class="scrim" id="scrim"></div>
+      <div class="sheet-scrim" id="sheetScrim"></div>
+
+      <!-- 分享 / 更多面板：抖音式（顶部头像 + 中部推广条 + 网格功能） -->
+      <div class="more-sheet" id="moreSheet" aria-hidden="true">
+        <div class="sheet-grab" id="moreGrab"><span></span></div>
+
+        <div class="ms-title">分享给</div>
+
+        <!-- 顶部：分享给谁 -->
+        <div class="ms-share-row">
+          <button class="ms-friend">
+            <span class="msf-av"></span>
+            <span class="msf-name">x1</span>
+            <span class="msf-sub">今天在线</span>
+          </button>
+          <button class="ms-friend ms-more">
+            <span class="msf-av msf-more-ico">›</span>
+            <span class="msf-name">更多</span>
+          </button>
+        </div>
+
+        <!-- 推广条 -->
+        <div class="ms-promo">
+          <span class="ms-promo-ico">D</span>
+          <span class="ms-promo-text">超高清、无广告看直播，前往<b>抖音直播伴侣 App ›</b></span>
+        </div>
+
+        <!-- 功能网格：两行 × 5 列 -->
+        <div class="ms-grid">
+          <button class="ms-item"><i class="msi-ico">🖼</i><span>保存图片</span></button>
+          <button class="ms-item"><i class="msi-ico">↗</i><span>分享链接</span></button>
+          <button class="ms-item"><i class="msi-ico">💬</i><span>聊天频道</span></button>
+          <button class="ms-item"><i class="msi-ico">🔥</i><span>上热门</span></button>
+          <button class="ms-item is-hl" id="moreStand"><i class="msi-ico">🎯</i><span>看台</span></button>
+
+          <button class="ms-item"><i class="msi-ico">🔇</i><span>清屏</span></button>
+          <button class="ms-item"><i class="msi-ico">📺</i><span>清晰度</span></button>
+          <button class="ms-item"><i class="msi-ico">⚙</i><span>直播设置</span></button>
+          <button class="ms-item"><i class="msi-ico">⚠</i><span>举报</span></button>
+          <button class="ms-item"><i class="msi-ico">💔</i><span>不感兴趣</span></button>
+        </div>
+      </div>
+
+      <!-- 看台面板 -->
+      <div class="sheet" id="sheet" aria-hidden="true">
+        <div class="sheet-head">
+          <div class="sheet-title">
+            <span class="st-name">看台</span>
+            <span class="st-live" id="standCount"><i class="st-dot"></i>8 人正在聊</span>
+          </div>
+        </div>
+
+        <div class="sheet-body">
+          <div class="pane-fade"></div>
+          <div class="stand-list" id="standList"></div>
+          <div class="toast" id="toast" aria-live="polite"></div>
+        </div>
+
+        <div class="composer-wrap">
+          <!-- Compose 态摘要：非回复时显示"最近 1 条讨论"，回复时显示引用摘要 -->
+          <div class="compose-summary" id="composeSummary" aria-hidden="true">
+            <div class="cs-item" id="csItem"></div>
+          </div>
+          <!-- 回复态：点了某条「回复」后升起 -->
+          <div class="reply-bar" id="replyBar" aria-hidden="true">
+            <span class="rb-label">回复 <b id="replyName">@某某</b></span>
+            <button class="rb-close" id="replyCancel" aria-label="取消回复">×</button>
+          </div>
+          <div class="composer">
+            <div class="composer-input-wrap">
+              <input class="composer-input" id="composer" type="text" autocomplete="off"
+                     placeholder="在看台说点什么…" maxlength="60">
+            </div>
+            <button class="composer-send" id="send">发送</button>
+          </div>
+          <!-- Compose 态工具行：与直播间键盘工具行完全一致的视觉 -->
+          <div class="composer-tools" aria-hidden="true">
+            <div class="ct-left">
+              <span class="tt-emoji">🤣</span>
+              <span class="tt-emoji">🐶</span>
+              <span class="tt-emoji">🫰</span>
+              <span class="tt-emoji tt-emoji--badge">🥺</span>
+            </div>
+            <div class="ct-right">
+              <span class="tt-ico" aria-label="@">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M16 12v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1"/></svg>
+              </span>
+              <span class="tt-ico" aria-label="AI">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><path d="M10 14l2-5 2 5M10.7 12.6h2.6"/><path d="M4 9c-1 2-1 4 0 6M20 9c1 2 1 4 0 6" stroke-linecap="round"/></svg>
+              </span>
+              <span class="tt-ico" aria-label="表情">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r=".8" fill="currentColor" stroke="none"/><circle cx="15" cy="10" r=".8" fill="currentColor" stroke="none"/><path d="M8.5 14.5c1 1.2 2.2 1.8 3.5 1.8s2.5-.6 3.5-1.8" stroke-linecap="round"/></svg>
+              </span>
+              <span class="tt-divider"></span>
+              <span class="tt-ico" aria-label="更多">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8" stroke-linecap="round"/></svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 右侧动态体验引导层：随交互状态自动推进，只显示当前步 -->
+  <aside class="guide" id="guide">
+    <header class="guide-head">
+      <span class="guide-kicker">Try the demo</span>
+      <div class="guide-progress">
+        <span class="gp-cur" id="guideCur">01</span>
+        <span class="gp-sep">/</span>
+        <span class="gp-total" id="guideTotal">05</span>
+      </div>
+    </header>
+
+    <div class="guide-track" id="guideTrack">
+      <div class="guide-bar" id="guideBar"></div>
+    </div>
+
+    <div class="guide-card" id="guideCard">
+      <h3 class="guide-title" id="guideTitle"></h3>
+      <p class="guide-desc" id="guideDesc"></p>
+      <div class="guide-hintline" id="guideHint"></div>
+    </div>
+
+    <div class="guide-done" id="guideDone" hidden>
+      <span class="gd-check">✓</span>
+      <span class="gd-text">体验完成</span>
+    </div>
+
+    <button class="guide-restart" id="guideRestart" type="button">
+      <span class="gr-ico">↻</span> Restart demo
+    </button>
+  </aside>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
