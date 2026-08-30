@@ -331,6 +331,7 @@ const el = {
   standList: $('standList'),
   sheet:     $('sheet'),
   sheetScrim:$('sheetScrim'),
+  keyboard:  $('keyboard'),
   dockInput: $('dockInput'),
   standCount:$('standCount'),
   scrim:     $('scrim'),
@@ -845,12 +846,43 @@ function startStand() {
 /* ------------------------------------------------------------
    面板：升起 / 收起
    ------------------------------------------------------------ */
+/*
+ * 面板外壳的唯一清理入口。
+ * 不依赖 state 布尔值判断，直接同时校正 DOM class、ARIA 与内存状态。
+ * 这样即使动画、延迟回调或快速点击曾让两者短暂不同步，下一次打开
+ * 任一面板时也只会留下目标面板，不会把看台、键盘、分享层叠在一起。
+ */
+function resetPanelChrome() {
+  el.screen.classList.remove('sheet-open', 'compose-open', 'kb-open', 'more-open');
+  el.dock.classList.remove('is-typing');
+  el.sheet.setAttribute('aria-hidden', 'true');
+  el.moreSheet.setAttribute('aria-hidden', 'true');
+  el.keyboard.setAttribute('aria-hidden', 'true');
+  state.open = false;
+  state.moreOpen = false;
+  state.composeOpen = false;
+  el.liveInput.blur();
+  el.composer.blur();
+}
+
+/* 手机屏幕只负责裁切，不应该保存任何滚动位置。
+   某些浏览器会在聚焦底部按钮或 scrollIntoView 时仍修改 overflow:hidden
+   元素的 scrollTop；这个残留会让下次打开的绝对定位面板整体上移。 */
+function resetScreenScroll() {
+  el.screen.scrollTop = 0;
+  el.screen.scrollLeft = 0;
+  requestAnimationFrame(() => {
+    el.screen.scrollTop = 0;
+    el.screen.scrollLeft = 0;
+  });
+}
+
 function openSheet() {
   /* 强制清理其他所有面板/键盘/挂起的延迟打开，杜绝三面板叠加 */
   clearTimeout(moreToStandTimer);
-  closeCompose();            // 退出 compose（同时清 compose-open + kb-open）
-  closeTyping();             // 兜底清 kb-open
-  closeMore();               // 清分享面板
+  closeCompose();            // 保存并还原可能存在的看台滚动位置
+  resetPanelChrome();        // 不相信残留布尔值，直接把视觉状态归零
+  resetScreenScroll();       // 清掉上一次交互可能遗留的手机内部滚动
   state.open = true;
   el.screen.classList.add('sheet-open');
   el.sheet.setAttribute('aria-hidden', 'false');
@@ -918,7 +950,10 @@ function insertNewDivider(n) {
 function scrollToNewDivider() {
   const div = el.standList.querySelector('.new-divider');
   if (div) {
-    div.scrollIntoView({ block: 'center' });
+    /* 只滚动消息列表本身。scrollIntoView 会继续滚动外层 .screen，
+       导致整个看台面板在下次打开时被推到屏幕顶部。 */
+    const target = div.offsetTop - (el.standList.clientHeight - div.offsetHeight) / 2;
+    el.standList.scrollTop = Math.max(0, target);
   } else {
     el.standList.scrollTop = el.standList.scrollHeight;
   }
@@ -931,6 +966,7 @@ function closeSheet() {
   /* 关闭面板同时退出 compose 态和键盘 */
   closeCompose();
   el.composer.blur();
+  resetScreenScroll();
   /* 收起时清掉半途的回复态，避免下次打开还挂着 */
   if (state.replyingTo) {
     state.replyingTo = null;
@@ -962,7 +998,8 @@ function openMore() {
   closeCompose();
   closeTyping();
   /* 分享面板与看台面板互斥：打开分享前先收起看台，避免两个面板叠在一起 */
-  if (state.open) closeSheet();
+  if (state.open || el.screen.classList.contains('sheet-open')) closeSheet();
+  resetPanelChrome();
   state.moreOpen = true;
   el.screen.classList.add('more-open');
   el.moreSheet.setAttribute('aria-hidden', 'false');
@@ -989,14 +1026,20 @@ el.moreStand.addEventListener('click', () => {
    直播间原生输入态：在直播间里直接发公屏，不打开面板
    ------------------------------------------------------------ */
 function openTyping() {
+  /* 直播间输入是独占态：取消分享→看台的延迟，并强制收起其他面板。 */
+  clearTimeout(moreToStandTimer);
+  if (state.open || el.screen.classList.contains('sheet-open')) closeSheet();
+  resetPanelChrome();
   el.dock.classList.add('is-typing');
   el.screen.classList.add('kb-open');
+  el.keyboard.setAttribute('aria-hidden', 'false');
   el.liveInput.focus();
   /* 不再在打字前触发 peek；只有真的发送评论后由 onSwept 唤起 rescue banner */
 }
 function closeTyping() {
   el.dock.classList.remove('is-typing');
   el.screen.classList.remove('kb-open');
+  el.keyboard.setAttribute('aria-hidden', 'true');
   el.liveInput.blur();
 }
 el.dockInput.addEventListener('click', openTyping);
@@ -1352,10 +1395,14 @@ function updateComposeSummary() {
 }
 
 function openCompose() {
-  if (state.composeOpen) return;
-  /* 只有在看台阅读态才允许进入 compose；分享面板开着或看台没开时忽略，
-     防止 more-open 与 compose-open/kb-open 三者共存叠加 */
-  if (!state.open || state.moreOpen) return;
+  if (state.composeOpen
+      && el.screen.classList.contains('compose-open')
+      && el.screen.classList.contains('kb-open')) return;
+  /* 只有在真实可见的看台阅读态才允许进入 compose，不能只相信 state.open。 */
+  if (!state.open || !el.screen.classList.contains('sheet-open')) return;
+  clearTimeout(moreToStandTimer);
+  closeMore();
+  closeTyping();
   state.composeOpen = true;
   /* 保存阅读态滚动位置，防止 sheet-body 隐藏后 scrollTop 归零 */
   state.savedStandScroll = el.standList.scrollTop;
@@ -1363,15 +1410,17 @@ function openCompose() {
   el.screen.classList.add('compose-open');
   /* 复用直播间的模拟键盘外壳升起（键盘按键不参与看台发送，只做视觉模拟） */
   el.screen.classList.add('kb-open');
+  el.keyboard.setAttribute('aria-hidden', 'false');
 }
 function closeCompose() {
-  if (!state.composeOpen) return;
+  const wasOpen = state.composeOpen || el.screen.classList.contains('compose-open');
   state.composeOpen = false;
   el.screen.classList.remove('compose-open');
   el.screen.classList.remove('kb-open');
+  el.keyboard.setAttribute('aria-hidden', 'true');
   el.composer.blur();
   /* 还原滚动位置 */
-  if (state.savedStandScroll != null) {
+  if (wasOpen && state.savedStandScroll != null) {
     /* 等 sheet-body 重新可见后再设置 */
     requestAnimationFrame(() => {
       el.standList.scrollTop = state.savedStandScroll;
