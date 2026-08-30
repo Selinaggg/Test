@@ -1353,6 +1353,9 @@ function updateComposeSummary() {
 
 function openCompose() {
   if (state.composeOpen) return;
+  /* 只有在看台阅读态才允许进入 compose；分享面板开着或看台没开时忽略，
+     防止 more-open 与 compose-open/kb-open 三者共存叠加 */
+  if (!state.open || state.moreOpen) return;
   state.composeOpen = true;
   /* 保存阅读态滚动位置，防止 sheet-body 隐藏后 scrollTop 归零 */
   state.savedStandScroll = el.standList.scrollTop;
