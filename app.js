@@ -1380,41 +1380,35 @@ el.guideRestart.addEventListener('click', () => {
 
 /* Demo 外部说明：独立于手机与 Try the demo 状态。 */
 const logicExplainer = $('logicExplainer');
-const logicToggle = $('logicToggle');
+const projectTab = $('projectTab');
+const logicTab = $('logicTab');
+const projectPanel = $('projectPanel');
 const logicPanel = $('logicPanel');
 
-if (logicToggle && window.BorderGlow) {
-  window.BorderGlow.attach(logicToggle, {
-    edgeSensitivity: 30,
-    glowColor: '40 80 80',
-    backgroundColor: '#120F17',
-    borderRadius: 28,
-    glowRadius: 40,
-    glowIntensity: 1.0,
-    coneSpread: 25,
-    animated: false,
-    autoLoop: true,
-    loopDuration: 7200,
-    colors: ['#c084fc', '#d684ee', '#7996ff']
-  });
-}
-
 function setLogicExplainer(open) {
-  if (!logicExplainer || !logicToggle || !logicPanel) return;
+  if (!logicExplainer || !projectTab || !logicTab || !projectPanel || !logicPanel) return;
   logicExplainer.classList.toggle('is-open', open);
-  logicToggle.setAttribute('aria-expanded', String(open));
+  projectTab.classList.toggle('is-active', !open);
+  logicTab.classList.toggle('is-active', open);
+  projectTab.setAttribute('aria-selected', String(!open));
+  logicTab.setAttribute('aria-selected', String(open));
+  projectTab.tabIndex = open ? -1 : 0;
+  logicTab.tabIndex = open ? 0 : -1;
+  projectPanel.setAttribute('aria-hidden', String(open));
   logicPanel.setAttribute('aria-hidden', String(!open));
 }
 
-if (logicToggle) {
-  logicToggle.addEventListener('click', () => {
-    setLogicExplainer(logicToggle.getAttribute('aria-expanded') !== 'true');
-  });
-  document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && logicToggle.getAttribute('aria-expanded') === 'true') {
-      setLogicExplainer(false);
-      logicToggle.focus();
-    }
+if (projectTab && logicTab) {
+  projectTab.addEventListener('click', () => setLogicExplainer(false));
+  logicTab.addEventListener('click', () => setLogicExplainer(true));
+  [projectTab, logicTab].forEach(tab => {
+    tab.addEventListener('keydown', event => {
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      const showLogic = tab === projectTab;
+      setLogicExplainer(showLogic);
+      (showLogic ? logicTab : projectTab).focus();
+    });
   });
 }
 

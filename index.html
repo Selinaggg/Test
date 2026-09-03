@@ -15,27 +15,17 @@
       <h1>智能评论筛选 <em>AI Comment Filter</em></h1>
       <div class="intro-meta-row">
         <p class="intro-sub">直播间互动机制原型 · 抖音</p>
-        <button class="logic-toggle border-glow-card" id="logicToggle" type="button"
-                aria-expanded="false" aria-controls="logicPanel">
-          <span class="edge-light" aria-hidden="true"></span>
-          <span class="border-glow-inner">
-            <svg class="logic-toggle-icon" viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M2.5 3.25h11L9.35 8v3.25l-2.7 1.5V8L2.5 3.25Z"></path>
-            </svg>
-            <span>筛选逻辑</span>
-            <svg class="logic-convert-icon" viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M2.5 5h9"></path>
-              <path d="m9.25 2.75 2.25 2.25-2.25 2.25"></path>
-              <path d="M13.5 11h-9"></path>
-              <path d="m6.75 8.75-2.25 2.25 2.25 2.25"></path>
-            </svg>
-          </span>
-        </button>
+      </div>
+      <div class="intro-tabs" role="tablist" aria-label="项目信息">
+        <button class="intro-tab is-active" id="projectTab" type="button" role="tab"
+                aria-selected="true" aria-controls="projectPanel">项目说明</button>
+        <button class="intro-tab" id="logicTab" type="button" role="tab"
+                aria-selected="false" aria-controls="logicPanel" tabindex="-1">筛选逻辑</button>
       </div>
     </header>
 
     <div class="intro-content">
-      <div class="intro-overview">
+      <div class="intro-overview" id="projectPanel" role="tabpanel" aria-labelledby="projectTab">
         <dl class="intro-context">
           <div class="intro-context-row">
             <dt>背景</dt>
@@ -71,7 +61,7 @@
         </section>
       </div>
 
-      <section class="logic-panel" id="logicPanel" aria-hidden="true">
+      <section class="logic-panel" id="logicPanel" role="tabpanel" aria-labelledby="logicTab" aria-hidden="true">
         <div class="logic-panel-inner">
           <header class="logic-head">
             <p class="logic-kicker">筛选逻辑</p>
