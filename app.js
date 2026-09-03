@@ -97,13 +97,34 @@ const CROWD_MSGS = [
   '主播这一手操作我给满分',
   '想问下大家用的什么设备看直播啊画质好清晰',
   '这波如果能推掉高地基本就锁定胜局了',
-  '真的一直在等这一波终于打出来了'
+  '真的一直在等这一波终于打出来了',
+  '先清中路兵线再看龙吧', '侧面有人绕后了', '对面技能交得差不多了',
+  '这波换资源其实不亏', '上路能不能直接 TP 过来', '打野的位置已经被看到了',
+  '辅助现在没闪，下一波要小心', 'AD 的输出环境太差了', '这阵容往后拖还能打',
+  '感觉还有翻盘点，别急着送', '中路这波兵线进塔了', '别追了，先拿眼前的塔',
+  '龙坑入口一个视野都没有', '高地塔还在，应该能再守一波', '先等大招转好再接团',
+  '下一条龙才是关键，这条可以放', '经济差到底多少了', '这波没人看住侧翼',
+  '主播刚刚说的换线有道理', '这局的节奏比上一把快太多了', '高地这里不能再丢视野了',
+  '打野如果能抢到龙还有得打', '辅助留个控制保后排会好很多', '现在转上路拿塔收益更高',
+  '河道草丛有眼，这个绕后很难成功', '阵容更适合拉扯，不要在龙坑里硬打',
+  '对面 AD 的闪现还没转好，可以找他的位置', '这波团赢了也要先把兵线送进去'
 ];
 
 /* ---------- 智能评论筛选语料 ---------- */
 const NOISE_COMMENTS = [
   '666666', '哈哈哈哈哈哈', '？？？？？？', '冲啊！！！', '主播看这里',
   '别送了别送了', '啊啊啊啊啊'
+];
+
+/* 只在未筛选公屏中出现，用于拉开筛选前后的信息密度差异。 */
+const LOW_INFO_COMMENTS = [
+  '666', '啊？', '来了来了', '笑死', '救命啊', '不是吧', '这也行', '好家伙',
+  '离谱', '我靠', '啊啊啊', '哈哈哈哈', '开饭了', '谁懂啊', '不敢看了',
+  '前排', '打卡', '主播加油', '兄弟们冲', '这波稳了', '完了完了',
+  '我裂开', '血压上来了', '别啊', '还能打吗', '真的吗', '这是啥',
+  '不看了', '又来', '有人吗', '弹幕太快了', '看不清', '哈哈哈哈哈哈哈',
+  '1', '2', '+1', '？？？', '。。。', '牛的', '绝了', '上分上分', '心疼',
+  '刚进来', '前面说啥了', '有回放吗', '比分多少', '画质不错', '声音有点小'
 ];
 
 const HIGHLIGHT_COMMENTS = [
@@ -113,7 +134,31 @@ const HIGHLIGHT_COMMENTS = [
   '这波资源其实可以直接放',
   '对面 AD 已经三件套了',
   '打野这个位置来得太晚了',
-  '感觉这波开团时机不太对'
+  '感觉这波开团时机不太对',
+  '蓝区入口没有提前留眼，打野绕后路线完全暴露了',
+  '这波不该接团，等上路 TP 转好再争资源更稳',
+  '辅助把控制交给前排后，后排就没有保护手段了',
+  '河道视野断了十几秒，继续压线的风险太高',
+  '对面 AD 装备领先，现在正面五打五很难处理',
+  '阵容缺少先手，应该让打野从侧面先逼位置',
+  '大龙可以放，换下路高地反而更赚',
+  '开团目标选错了，第一时间应该限制对面 AD',
+  '上路没线权，这时候进野区容易被两面夹击',
+  '辅助站位太靠前，导致后排第一时间没人保护',
+  '打野惩戒还在冷却，不适合现在逼大龙',
+  '装备差已经拉开，最好避战等下一件成装',
+  '这波河道口能提前封住，团战会好打很多',
+  '阵容更适合拉扯，不应该在狭窄地形硬开',
+  '对面关键控制交完了，现在才是反打窗口',
+  '中路线没处理就接团，赢了也很难转资源',
+  '上路 TP 落点太远，正面只能先拖时间',
+  '辅助的扫描没有问题，问题是队友跟进慢了',
+  '打野位置被看到了，这条龙其实已经很难争',
+  'AD 还差一件装备，拖两分钟再接团收益更高',
+  '辅助先占住侧面草丛，阵容的开团角度会更好',
+  '打野没必要抢着进场，等辅助控制命中更稳',
+  '河道这波视野差不是一个眼，是整体站位太靠后',
+  '阵容中期强势期已经过了，接下来要避免正面碰撞'
 ];
 
 const PERSONAL_COMMENTS = [
@@ -121,23 +166,55 @@ const PERSONAL_COMMENTS = [
   '我觉得不是辅助，是上路支援太慢',
   '这波主要还是河道没视野',
   '辅助前面把关键技能交掉了',
+  '辅助这里站位导致开团太早',
+  '这波开团时机确实太早',
   '@我 我也觉得辅助这波站位有问题',
-  '其实辅助已经在给信号了'
+  '其实辅助已经在给信号了',
+  '辅助这次扫描路线没覆盖到河道草',
+  '我更关注开团后的跟进，第一波伤害没有接上',
+  '辅助先手没问题，但上路 TP 明显慢了一拍',
+  '开团前如果先排掉河道视野会稳很多',
+  '这波辅助应该留控制保护 AD',
+  '开团目标一直是前排，后排完全没有受到压力',
+  '辅助已经给信号了，打野还是进得太深',
+  '我觉得阵容需要辅助先占住侧面草丛',
+  '辅助装备偏保护，现在主动开团成功率不高',
+  '这波开团角度很好，可惜 AD 距离太远',
+  '@我 辅助的问题更像是视野节奏没对上',
+  '开团前上路线没推进，赢团也拿不到资源',
+  '辅助绕后时间太久，正面已经被迫开了',
+  '打野应该等辅助控制命中后再进场',
+  '河道视野刚消失就开团，风险确实太大',
+  '阵容需要拉扯，但辅助连续选择强开',
+  'AD 装备还没成型，辅助应该先保发育',
+  '辅助留一个控制技能，后排会安全很多',
+  '开团时机没错，错的是队友站位太分散',
+  '我觉得这波更像沟通问题，不是辅助单点失误',
+  '辅助第一时间看的是河道，开团信号来得太突然',
+  '如果打野先给侧面压力，辅助的开团会更自然',
+  '这波其实不用强开，等辅助把视野铺出去就行',
+  '我想看辅助怎么处理下一波龙坑视野'
 ];
+
+const COMMENT_TOPICS = ['辅助', '开团', '上路', '河道', '视野', '打野', 'AD', '装备', '阵容'];
+
+function inferCommentTopics(text = '') {
+  return COMMENT_TOPICS.filter(topic => text.includes(topic));
+}
 
 /* ---------- 速率与时序参数（§3 / §4） ---------- */
 const RATE = {
-  crowdMin: 1500,    // 首页与筛选结果统一放慢到 1.5 秒一条
+  crowdMin: 1500,    // 首页保持 1.5 秒一条
   crowdMax: 1500,
-  filteredMin: 1500,
-  filteredMax: 1500,
-  crowdKeep: 45      // 公屏 DOM 最多保留条数（一屏约 10 条，留足缓冲）
+  filteredMin: 1900, // 筛选开启后单独放慢，不影响首页节奏
+  filteredMax: 1900,
+  crowdKeep: 120     // 保留足够历史评论，支持演示期间稳定向上翻看
 };
 
 const TIMING = {
   firstGuideMin: 800,
   firstGuideMax: 1200,
-  filterSweep: 1350,
+  filterSweep: 1500,
   toast: 2400
 };
 
@@ -152,6 +229,8 @@ const $ = (id) => document.getElementById(id);
 
 const el = {
   screen:    $('screen'),
+  phoneFrame:$('phoneFrame'),
+  stepPointer:$('stepPointer'),
   feed:      document.querySelector('.feed'),
   mainCrowd: $('mainCrowd'),
   giftArea:  $('giftArea'),
@@ -212,11 +291,26 @@ const state = {
   filterResultTimer: null,
   filterResultToken: 0,
   filterSweepEndHandler: null,
-  filterSweepCallbacks: []
+  filterSweepCallbacks: [],
+  crowdHistoryOpening: false,
+  crowdTouchY: null,
+  crowdTouchMoved: false
 };
 
 const rand  = (a, b) => a + Math.random() * (b - a);
 const pick  = (arr) => arr[(Math.random() * arr.length) | 0];
+const recentCommentTexts = new Map();
+
+/* 各模式独立保留一小段播放历史，避免刚出现的文案马上重复。 */
+function pickFreshComment(pool, key, historySize = 10) {
+  if (!pool.length) return '';
+  const recent = recentCommentTexts.get(key) || [];
+  const available = pool.filter(text => !recent.includes(text));
+  const text = pick(available.length ? available : pool);
+  const keep = Math.min(historySize, Math.max(1, pool.length - 1));
+  recentCommentTexts.set(key, [...recent, text].slice(-keep));
+  return text;
+}
 
 /* ------------------------------------------------------------
    直播间氛围：真实截图已含在线人数与比赛计时，无需再脚本驱动
@@ -293,9 +387,12 @@ function crowdNode(msg) {
   const box = document.createElement('div');
   box.className = 'msg-plain' + (msg.mine ? ' is-mine' : '');
   if (msg.category) box.dataset.category = msg.category;
+  const topics = Array.isArray(msg.topics) ? msg.topics : inferCommentTopics(msg.text);
+  if (topics.length) box.dataset.topics = topics.join('|');
   if (msg.text && msg.text.includes('@我')) box.classList.add('is-mention');
   box.appendChild(lvBadge(msg.mine ? 27 : levelFor(msg.name)));
   if (msg.kind === 'join') {
+    box.classList.add('is-join');
     box.appendChild(span('uname', msg.name + ' '));
     box.appendChild(span('body', '来了'));
   } else if (msg.kind === 'follow') {
@@ -304,15 +401,72 @@ function crowdNode(msg) {
     box.appendChild(span('body', '关注了主播'));
   } else {
     box.appendChild(span('uname', msg.mine ? '我：' : msg.name + '：'));
-    box.appendChild(span('body', msg.text));
+    const body = span('body');
+    String(msg.text || '').split(/(@我)/g).filter(Boolean).forEach(part => {
+      if (part === '@我') body.appendChild(span('mention-me', part));
+      else body.appendChild(document.createTextNode(part));
+    });
+    box.appendChild(body);
   }
   return box;
 }
+
+function isCrowdNearBottom() {
+  const box = el.mainCrowd;
+  return box.scrollHeight - box.clientHeight - box.scrollTop <= 10;
+}
+
+function openCrowdHistory() {
+  if (el.mainCrowd.classList.contains('is-history-browsing')) return;
+  state.crowdHistoryOpening = true;
+  el.mainCrowd.classList.add('is-history-browsing');
+  el.mainCrowd.scrollTop = el.mainCrowd.scrollHeight;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    state.crowdHistoryOpening = false;
+  }));
+}
+
+function closeCrowdHistory() {
+  el.mainCrowd.classList.remove('is-history-browsing');
+  el.mainCrowd.scrollTop = 0;
+}
+
+el.mainCrowd.addEventListener('wheel', event => {
+  if (event.deltaY < 0) openCrowdHistory();
+}, { passive: true });
+
+el.mainCrowd.addEventListener('touchstart', event => {
+  openCrowdHistory();
+  state.crowdTouchY = event.touches[0]?.clientY ?? null;
+  state.crowdTouchMoved = false;
+}, { passive: true });
+
+el.mainCrowd.addEventListener('touchmove', event => {
+  const nextY = event.touches[0]?.clientY;
+  if (nextY == null || state.crowdTouchY == null) return;
+  if (Math.abs(nextY - state.crowdTouchY) > 2) state.crowdTouchMoved = true;
+  state.crowdTouchY = nextY;
+}, { passive: true });
+
+el.mainCrowd.addEventListener('touchend', () => {
+  if (!state.crowdTouchMoved && isCrowdNearBottom()) closeCrowdHistory();
+  state.crowdTouchY = null;
+  state.crowdTouchMoved = false;
+}, { passive: true });
+
+el.mainCrowd.addEventListener('scroll', () => {
+  if (!state.crowdHistoryOpening &&
+      el.mainCrowd.classList.contains('is-history-browsing') &&
+      isCrowdNearBottom()) {
+    closeCrowdHistory();
+  }
+}, { passive: true });
 
 /* 入场：sizer 的 max-height 由 0 线性长到 100px，把上面的消息平滑顶上去 */
 function enter(box, node, instant) {
   const sizer = document.createElement('div');
   sizer.className = instant ? 'sizer' : 'sizer is-live-entering';
+  if (node.classList.contains('is-mine')) sizer.classList.add('is-own-row');
   sizer.appendChild(node);
   box.appendChild(sizer);
 
@@ -338,8 +492,23 @@ function pushCrowd(msg, instant) {
   const box  = el.mainCrowd;
   const node = crowdNode(msg);
   enter(box, node, instant);
-  while (box.childElementCount > RATE.crowdKeep) box.removeChild(box.firstElementChild);
+  while (box.querySelectorAll(':scope > .sizer').length > RATE.crowdKeep) {
+    box.querySelector(':scope > .sizer')?.remove();
+  }
   return node;
+}
+
+/* Demo 会反复预填同一句话；只合并重复的同文自评，不影响不同内容的正常发言。 */
+function dedupeOwnComments() {
+  const seen = new Set();
+  Array.from(el.mainCrowd.querySelectorAll('.msg-plain.is-mine')).reverse().forEach(node => {
+    const text = node.querySelector('.body')?.textContent || '';
+    if (!seen.has(text)) {
+      seen.add(text);
+      return;
+    }
+    node.closest('.sizer')?.remove();
+  });
 }
 
 /* 按真实配比随机生成一条公屏消息 */
@@ -352,17 +521,41 @@ function pickNick(){
 
 function randomCrowdMsg() {
   if (state.mode === 'highlight') {
-    return { kind: 'comment', name: pickNick(), text: pick(HIGHLIGHT_COMMENTS), category: 'highlight' };
+    return {
+      kind: 'comment',
+      name: pickNick(),
+      text: pickFreshComment(HIGHLIGHT_COMMENTS, 'highlight', 12),
+      category: 'highlight'
+    };
   }
   if (state.mode === 'for-you') {
-    return { kind: 'comment', name: pickNick(), text: pick(PERSONAL_COMMENTS), category: 'personal' };
+    const topicPool = [...PERSONAL_COMMENTS, ...HIGHLIGHT_COMMENTS, ...CROWD_MSGS]
+      .filter(text => inferCommentTopics(text).some(topic => state.userTopics.includes(topic)));
+    const text = pickFreshComment(
+      topicPool.length ? topicPool : PERSONAL_COMMENTS,
+      'for-you',
+      12
+    );
+    return { kind: 'comment', name: pickNick(), text, category: 'personal' };
   }
   let r = Math.random();
   if ((r -= MIX.follow) < 0) return { kind: 'follow', name: pickNick() };
   if ((r -= MIX.join)   < 0) return { kind: 'join',   name: pickNick() };
   if ((r -= MIX.notice) < 0) return pick(NOTICES);
   if ((r -= MIX.anchor) < 0) return { kind: 'anchor', text: pick(ANCHOR_MSGS) };
-  return { kind: 'comment', name: pickNick(), text: pick(CROWD_MSGS) };
+  if (Math.random() < 0.38) {
+    return {
+      kind: 'comment',
+      name: pickNick(),
+      text: pickFreshComment(LOW_INFO_COMMENTS, 'all-low-info', 14),
+      category: 'noise'
+    };
+  }
+  return {
+    kind: 'comment',
+    name: pickNick(),
+    text: pickFreshComment(CROWD_MSGS, 'all-comment', 14)
+  };
 }
 
 function crowdTick() {
@@ -376,7 +569,36 @@ function crowdTick() {
 
 /* 预填一屏，避免刚打开时下方是空的（预填的不走入场动效） */
 function seedCrowd(n) {
-  for (let i = 0; i < n; i++) pushCrowd(randomCrowdMsg(), true);
+  for (let i = 0; i < n; i++) {
+    let msg;
+    if (i % 5 === 2) {
+      msg = { kind: 'join', name: pickNick() };
+    } else if (i % 4 === 0) {
+      msg = {
+        kind: 'comment',
+        name: pickNick(),
+        text: pickFreshComment(LOW_INFO_COMMENTS, 'all-low-info', 14),
+        category: 'noise'
+      };
+    } else if (i % 10 === 6) {
+      msg = {
+        kind: 'comment',
+        name: pickNick(),
+        text: pickFreshComment(PERSONAL_COMMENTS, 'seed-personal', 8),
+        category: 'personal'
+      };
+    } else if (i % 8 === 6) {
+      msg = {
+        kind: 'comment',
+        name: pickNick(),
+        text: pickFreshComment(HIGHLIGHT_COMMENTS, 'seed-highlight', 8),
+        category: 'highlight'
+      };
+    } else {
+      msg = randomCrowdMsg();
+    }
+    pushCrowd(msg, true);
+  }
 }
 
 /* ------------------------------------------------------------
@@ -429,8 +651,8 @@ function buildGiftCard(gift) {
   return box;
 }
 
-/* 从左滑入 */
-function giftEnter(gift) {
+/* 从左滑入固定的上 / 下槽位，两条礼物互不推挤。 */
+function giftEnter(gift, slot = 'bottom') {
   const probe = buildGiftCard(gift);
   Object.assign(probe.style, { position: 'fixed', visibility: 'hidden', pointerEvents: 'none' });
   document.body.appendChild(probe);
@@ -438,7 +660,15 @@ function giftEnter(gift) {
   document.body.removeChild(probe);
 
   const wrapper = document.createElement('div');
-  Object.assign(wrapper.style, { overflow: 'hidden', maxHeight: '0px', transition: 'none' });
+  Object.assign(wrapper.style, {
+    position: 'absolute',
+    left: '12px',
+    right: '54px',
+    bottom: slot === 'top' ? '52px' : '4px',
+    overflow: 'hidden',
+    maxHeight: '0px',
+    transition: 'none'
+  });
   const inner = buildGiftCard(gift);
   Object.assign(inner.style, { opacity: '0', transform: 'translateX(-120%)', transition: 'none' });
   wrapper.appendChild(inner);
@@ -482,10 +712,10 @@ function startGiftLoop() {
 
   function runCycle() {
     const g0 = { img: 'a' }, g1 = { img: 'b' };
-    const el0 = giftEnter(g0);
-    /* 1.0s 后第二份礼物插入，把第一份往上推 */
+    /* 先在下方槽位滑入，随后上方礼物独立滑入。 */
+    const el0 = giftEnter(g0, 'bottom');
     const t1 = setTimeout(() => {
-      const el1 = giftEnter(g1);
+      const el1 = giftEnter(g1, 'top');
       /* 再 2s 后第一份先渐隐 */
       const t2 = setTimeout(() => {
         giftLeave(el0, () => {
@@ -564,12 +794,14 @@ function openTyping() {
   el.liveSend.classList.add('is-ready');
   el.liveInput.focus();
   el.liveInput.setSelectionRange(el.liveInput.value.length, el.liveInput.value.length);
+  Guide.refreshPointer(360);
 }
 function closeTyping() {
   el.dock.classList.remove('is-typing');
   el.screen.classList.remove('kb-open');
   el.keyboard.setAttribute('aria-hidden', 'true');
   el.liveInput.blur();
+  Guide.refreshPointer(300);
 }
 el.dockInput.addEventListener('click', openTyping);
 el.liveInput.addEventListener('input', () => {
@@ -592,7 +824,7 @@ el.screen.addEventListener('click', (e) => {
       return;
     }
     if (el.filterSheet.contains(e.target)) return;
-    closeFilterSettings();
+    closeFilterSettings(true);
     return;
   }
   if (!el.screen.classList.contains('kb-open')) return;
@@ -611,6 +843,7 @@ function liveSubmit() {
   state.latestUserComment = text;
   state.userTopics = ['辅助', '开团'];
   pushCrowd({ kind: 'comment', name: ME.name, text, mine: true, category: 'mine' });
+  dedupeOwnComments();
   Guide.reach('comment');
   scheduleFilterGuide();
 }
@@ -673,24 +906,79 @@ function setFilterMode(nextMode, { animate = true } = {}) {
   const previousMode = state.mode;
   if (previousMode === nextMode) nextMode = 'all';
   state.mode = nextMode;
+  if (nextMode === 'all') clearFilterReflowOffsets();
   updateFilterControl();
   renderTopics();
-  if (nextMode === 'highlight') Guide.reach('filter');
+  if (nextMode === 'highlight') Guide.reach('highlight');
   if (nextMode === 'for-you') Guide.reach('personalize');
-  if (nextMode === 'all') Guide.reach('exit');
   if (nextMode !== 'all' && animate && previousMode !== nextMode) {
     runFilterAnimation(updateFilterControl, nextMode);
   }
 }
 
 function isHighInformation(node) {
-  if (!node || node.classList.contains('is-mine')) return true;
+  if (!node || node.classList.contains('is-mine')) return false;
+  if (node.dataset.category === 'noise') return false;
   if (node.dataset.category === 'highlight' || node.dataset.category === 'personal') return true;
   const text = node.querySelector('.body')?.textContent || '';
   return text.length >= 11 && !NOISE_COMMENTS.some(noise => text.includes(noise.slice(0, 3)));
 }
 
-function playFilterSweep(onComplete, { hideCommentsAtEnd = false } = {}) {
+function matchesCurrentFilter(node, mode = state.mode) {
+  if (!node || node.classList.contains('is-mine')) return false;
+  if (mode === 'highlight') return isHighInformation(node);
+  if (mode === 'for-you') {
+    const topics = (node.dataset.topics || '').split('|').filter(Boolean);
+    return topics.some(topic => state.userTopics.includes(topic));
+  }
+  return true;
+}
+
+function clearFilterReflowOffsets() {
+  el.mainCrowd.querySelectorAll(':scope > .sizer').forEach(holder => {
+    holder.style.removeProperty('transition');
+    holder.style.removeProperty('transform');
+  });
+}
+
+function removeNonMatchingComments(mode, onComplete = () => {}) {
+  const holders = Array.from(el.mainCrowd.querySelectorAll('.sizer:not(.is-filter-removing)')).filter(holder => {
+    const node = holder.querySelector('.msg-plain');
+    return node && !matchesCurrentFilter(node, mode);
+  });
+
+  if (!holders.length) {
+    onComplete();
+    return;
+  }
+
+  let remaining = holders.length;
+  const finishFade = () => {
+    remaining -= 1;
+    if (remaining !== 0) return;
+    /* 保留筛除项的占位，不让下方评论在筛选完成时瞬间补位。
+       后续新评论仍通过原有 sizer 入场，自然推动整条评论流向上。 */
+    onComplete();
+  };
+
+  holders.forEach(holder => {
+    const node = holder.querySelector('.msg-plain');
+    holder.classList.add('is-filter-removing');
+
+    const finish = event => {
+      if (event.target !== node || event.propertyName !== 'opacity') return;
+      node.removeEventListener('transitionend', finish);
+      finishFade();
+    };
+
+    node.addEventListener('transitionend', finish);
+    requestAnimationFrame(() => {
+      node.classList.add('is-filtering-out');
+    });
+  });
+}
+
+function playFilterSweep(onComplete) {
   if (!el.feed) {
     onComplete();
     return;
@@ -709,7 +997,6 @@ function playFilterSweep(onComplete, { hideCommentsAtEnd = false } = {}) {
   const finish = event => {
     if (event.target !== feed || event.animationName !== 'filterGlareScan') return;
     feed.removeEventListener('animationend', finish);
-    if (hideCommentsAtEnd) el.mainCrowd.classList.add('is-filter-source-hidden');
     feed.classList.remove('filter-scan-active');
     state.filterSweepEndHandler = null;
     const callbacks = state.filterSweepCallbacks.splice(0);
@@ -722,6 +1009,7 @@ function playFilterSweep(onComplete, { hideCommentsAtEnd = false } = {}) {
 }
 
 function runFilterAnimation(onDone, expectedMode) {
+  dedupeOwnComments();
   const resultToken = ++state.filterResultToken;
   clearTimeout(state.crowdTimer);
   clearTimeout(state.filterResultTimer);
@@ -731,44 +1019,30 @@ function runFilterAnimation(onDone, expectedMode) {
   playFilterSweep(() => {
     if (resultToken !== state.filterResultToken) return;
     if (state.mode !== expectedMode) {
-      el.mainCrowd.classList.remove('is-filter-source-hidden');
       state.filterTransition = false;
-      state.crowdTimer = setTimeout(crowdTick, RATE.filteredMin);
+      const nextDelay = state.mode === 'all' ? RATE.crowdMin : RATE.filteredMin;
+      state.crowdTimer = setTimeout(crowdTick, nextDelay);
       return;
     }
-    const nodes = Array.from(el.mainCrowd.querySelectorAll('.msg-plain'));
-    nodes.forEach(node => {
-      if (node.classList.contains('is-mine')) return;
-      const holder = node.closest('.sizer');
-      if (holder) holder.remove();
-    });
-
-    el.mainCrowd.classList.remove('is-filter-source-hidden');
-
-    let resultCount = 0;
-    const targetResultCount = 9;
-    const addNextResult = () => {
+    removeNonMatchingComments(expectedMode, () => {
       if (resultToken !== state.filterResultToken) return;
       if (state.mode !== expectedMode) {
         state.filterTransition = false;
-        state.crowdTimer = setTimeout(crowdTick, RATE.filteredMin);
+        const nextDelay = state.mode === 'all' ? RATE.crowdMin : RATE.filteredMin;
+        state.crowdTimer = setTimeout(crowdTick, nextDelay);
         return;
       }
+      state.filterTransition = false;
+      state.filterResultTimer = null;
+      onDone();
+      state.crowdTimer = setTimeout(crowdTick, RATE.filteredMin);
+    });
+  });
+}
 
-      pushCrowd(randomCrowdMsg());
-      resultCount += 1;
-      if (resultCount >= targetResultCount) {
-        state.filterTransition = false;
-        state.filterResultTimer = null;
-        onDone();
-        state.crowdTimer = setTimeout(crowdTick, RATE.filteredMin);
-        return;
-      }
-      state.filterResultTimer = setTimeout(addNextResult, RATE.filteredMin);
-    };
-
-    addNextResult();
-  }, { hideCommentsAtEnd: true });
+function updateTopicFilterInPlace() {
+  if (state.mode !== 'for-you' || state.filterTransition) return;
+  removeNonMatchingComments('for-you');
 }
 
 function renderTopics() {
@@ -786,7 +1060,8 @@ function renderTopics() {
     remove.addEventListener('click', () => {
       state.userTopics = state.userTopics.filter(item => item !== topic);
       renderTopics();
-      runFilterAnimation(updateFilterControl, state.mode);
+      Guide.reach('topics');
+      updateTopicFilterInPlace();
     });
     chip.appendChild(remove);
     el.topicList.appendChild(chip);
@@ -802,16 +1077,18 @@ function openFilterSettings() {
   el.screen.classList.add('filter-settings-open');
   el.filterSheet.setAttribute('aria-hidden', 'false');
   updateFilterControl();
-  Guide.reach('settings');
+  Guide.reach('open-filter');
 }
 
-function closeFilterSettings() {
+function closeFilterSettings(returnToLive = false) {
+  const wasOpen = state.settingsOpen;
   state.settingsOpen = false;
   el.screen.classList.remove('filter-settings-open', 'topic-kb-open');
   el.filterSheet.setAttribute('aria-hidden', 'true');
   el.keyboard.setAttribute('aria-hidden', 'true');
   el.topicInput.value = '';
   el.topicInput.blur();
+  if (wasOpen && returnToLive) Guide.reach('return-live');
 }
 
 function toggleHighlightDesc() {
@@ -834,7 +1111,10 @@ function addTopic() {
   if (added) state.userTopics.push(topic);
   el.topicInput.value = '';
   renderTopics();
-  if (added) runFilterAnimation(updateFilterControl, state.mode);
+  if (added) {
+    Guide.reach('topics');
+    updateTopicFilterInPlace();
+  }
 }
 
 function scrollFilterToBottomSoft(duration = 300) {
@@ -882,6 +1162,7 @@ function openTopicKeyboard() {
     el.topicInput.focus();
   }
   scrollFilterToBottomSoft();
+  Guide.refreshPointer(340);
 }
 
 function closeTopicKeyboard() {
@@ -890,6 +1171,7 @@ function closeTopicKeyboard() {
   if (state.topicScrollRaf) cancelAnimationFrame(state.topicScrollRaf);
   state.topicScrollRaf = 0;
   el.topicInput.blur();
+  Guide.refreshPointer(300);
 }
 
 el.openFilter.addEventListener('click', openFilterSettings);
@@ -900,7 +1182,7 @@ el.personalToggle.addEventListener('click', () => setFilterMode('for-you'));
 el.personalSwitch.addEventListener('click', () => setFilterMode('for-you'));
 el.highlightInfo.addEventListener('click', toggleHighlightDesc);
 el.personalInfo.addEventListener('click', togglePersonalDesc);
-el.filterScrim.addEventListener('click', closeFilterSettings);
+el.filterScrim.addEventListener('click', () => closeFilterSettings(true));
 el.addTopic.addEventListener('click', addTopic);
 el.topicInput.addEventListener('click', openTopicKeyboard);
 el.topicInput.addEventListener('keydown', event => {
@@ -919,39 +1201,122 @@ const Guide = (() => {
   const STEPS = [
     {
       id: 'comment',
-      title: '先在公屏发一条评论',
-      desc: '点击底部「说点什么…」，输入一句话发送到直播间公屏。',
-      hint: '在底部输入框输入并发送'
+      title: '发一条观点',
+      desc: '发送后持续高亮自己的评论，感知到自己是否成功发言',
+      hint: '',
+      target: '#dockInput',
+      side: 'bottom'
     },
     {
-      id: 'filter',
+      id: 'open-filter',
+      title: '打开筛选评论',
+      desc: '底部筛选入口会出现轻提示。',
+      hint: '',
+      target: '#openFilter',
+      side: 'left'
+    },
+    {
+      id: 'highlight',
       title: '只看精彩评论',
-      desc: '发送后，自己的评论会持续高亮。约一秒后，底部筛选按钮上方会出现轻提示。',
-      hint: '点击底部筛选 icon 或「点击筛选评论」气泡'
+      desc: 'AI 扫描结束后，公屏会优先呈现更有信息价值的评论。',
+      hint: '',
+      target: '#highlightSwitch',
+      side: 'right'
     },
     {
       id: 'personalize',
-      title: '切换为你精选',
-      desc: '筛选面板内可以切换精彩评论或为你精选，为你精选会根据刚刚的发言优先展示相关观点。',
-      hint: '打开筛选评论面板并切换开关'
+      title: '试试为你精选',
+      desc: '公屏会结合你的发言和互动重新筛选评论。',
+      hint: '',
+      target: '#personalSwitch',
+      side: 'right'
     },
     {
-      id: 'settings',
+      id: 'topics',
       title: '调整关注内容',
-      desc: '在筛选评论面板里，可以删除当前话题或添加新的关注内容。',
-      hint: '编辑「当前关注」'
+      desc: '添加或移除关注词，观察公屏如何再次更新。',
+      hint: '',
+      target: '#topicInput',
+      side: 'right'
     },
     {
-      id: 'exit',
-      title: '恢复全部评论',
-      desc: '关闭当前开关后，后续公屏恢复全部评论。',
-      hint: '再次点击已开启的筛选开关'
+      id: 'return-live',
+      title: '返回直播间，查看筛选结果',
+      desc: '收起面板回到公屏。无关干扰已经淡出，评论区只保留与你当前关注更相关的讨论。',
+      hint: '› 点击面板外的直播画面',
+      target: '#screen',
+      targetY: .27,
+      side: 'right'
     }
   ];
 
   let idx = 0;            // 当前步索引
   let finished = false;
+  let pointerReminderTimer = null;
+  let pointerSettleTimer = null;
   el.guideTotal.textContent = String(STEPS.length).padStart(2, '0');
+
+  function positionPointer(step = STEPS[idx]) {
+    if (!el.stepPointer || !el.phoneFrame || !step || finished) return;
+    let target = document.querySelector(step.target);
+    if (step.id === 'comment' && el.screen.classList.contains('kb-open')) target = el.liveInput;
+    if (!target) return;
+
+    const frameRect = el.phoneFrame.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const targetX = targetRect.left + targetRect.width * .5 - frameRect.left;
+    const targetY = targetRect.top + targetRect.height * (step.targetY ?? .5) - frameRect.top;
+    const isBottom = step.side === 'bottom';
+    const x = isBottom
+      ? Math.max(18, Math.min(frameRect.width - 18, targetX))
+      : step.side === 'left' ? -15 : frameRect.width + 15;
+    const y = isBottom
+      ? frameRect.height + 15
+      : Math.max(18, Math.min(frameRect.height - 18, targetY));
+
+    el.stepPointer.style.setProperty('--pointer-x', `${x}px`);
+    el.stepPointer.style.setProperty('--pointer-y', `${y}px`);
+    el.stepPointer.classList.toggle('is-left', step.side === 'left');
+    el.stepPointer.classList.toggle('is-right', step.side === 'right');
+    el.stepPointer.classList.toggle('is-bottom', isBottom);
+  }
+
+  function replayPointer(className) {
+    if (!el.stepPointer) return;
+    el.stepPointer.classList.remove('is-cue', 'is-reminder');
+    void el.stepPointer.offsetWidth;
+    el.stepPointer.classList.add(className);
+  }
+
+  function cuePointer(step) {
+    if (!el.stepPointer) return;
+    clearTimeout(pointerReminderTimer);
+    clearTimeout(pointerSettleTimer);
+    const isFirstPosition = !el.stepPointer.classList.contains('is-positioned');
+    if (isFirstPosition) el.stepPointer.classList.remove('is-visible');
+    positionPointer(step);
+    if (isFirstPosition) {
+      /* 首帧先静默落位，再允许后续步骤移动，避免刷新时箭头从侧边掉下来。 */
+      void el.stepPointer.offsetWidth;
+      el.stepPointer.classList.add('is-positioned');
+    }
+    el.stepPointer.classList.add('is-visible');
+    replayPointer('is-cue');
+
+    /* 面板与键盘仍在移动时，结束后再校准一次，不让尖头停在旧位置。 */
+    pointerSettleTimer = setTimeout(() => positionPointer(step), 420);
+    pointerReminderTimer = setTimeout(() => {
+      if (!finished && STEPS[idx] === step) replayPointer('is-reminder');
+    }, 10600);
+  }
+
+  function refreshPointer(settleDelay = 0) {
+    if (finished) return;
+    const step = STEPS[idx];
+    requestAnimationFrame(() => positionPointer(step));
+    clearTimeout(pointerSettleTimer);
+    if (settleDelay) pointerSettleTimer = setTimeout(() => positionPointer(step), settleDelay);
+  }
 
   function render() {
     const step = STEPS[idx];
@@ -966,10 +1331,14 @@ const Guide = (() => {
     el.guideCard.classList.add('is-swap');
     el.guideDone.hidden = true;
     el.guideCard.style.display = '';
+    cuePointer(step);
   }
 
   function complete() {
     finished = true;
+    clearTimeout(pointerReminderTimer);
+    clearTimeout(pointerSettleTimer);
+    if (el.stepPointer) el.stepPointer.classList.remove('is-visible', 'is-cue', 'is-reminder');
     el.guideCur.textContent = String(STEPS.length).padStart(2, '0');
     el.guideBar.style.width = '100%';
     el.guideCard.style.display = 'none';
@@ -999,13 +1368,55 @@ const Guide = (() => {
   }
 
   render();
-  return { reach, restart };
+  return { reach, restart, refreshPointer };
 })();
+
+window.addEventListener('resize', () => Guide.refreshPointer());
 
 el.guideRestart.addEventListener('click', () => {
   /* 整页刷新会复位全部 Demo 状态和挂起的定时器。 */
   location.reload();
 });
+
+/* Demo 外部说明：独立于手机与 Try the demo 状态。 */
+const logicExplainer = $('logicExplainer');
+const logicToggle = $('logicToggle');
+const logicPanel = $('logicPanel');
+
+if (logicToggle && window.BorderGlow) {
+  window.BorderGlow.attach(logicToggle, {
+    edgeSensitivity: 30,
+    glowColor: '40 80 80',
+    backgroundColor: '#120F17',
+    borderRadius: 28,
+    glowRadius: 40,
+    glowIntensity: 1.0,
+    coneSpread: 25,
+    animated: false,
+    autoLoop: true,
+    loopDuration: 7200,
+    colors: ['#c084fc', '#d684ee', '#7996ff']
+  });
+}
+
+function setLogicExplainer(open) {
+  if (!logicExplainer || !logicToggle || !logicPanel) return;
+  logicExplainer.classList.toggle('is-open', open);
+  logicToggle.setAttribute('aria-expanded', String(open));
+  logicPanel.setAttribute('aria-hidden', String(!open));
+}
+
+if (logicToggle) {
+  logicToggle.addEventListener('click', () => {
+    setLogicExplainer(logicToggle.getAttribute('aria-expanded') !== 'true');
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && logicToggle.getAttribute('aria-expanded') === 'true') {
+      setLogicExplainer(false);
+      logicToggle.focus();
+    }
+  });
+}
 
 /* ------------------------------------------------------------
    启动

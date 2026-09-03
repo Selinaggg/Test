@@ -4,55 +4,123 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>智能评论筛选</title>
+<link rel="stylesheet" href="BorderGlow.css">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="stage">
-  <aside class="intro">
+  <aside class="intro" id="logicExplainer">
     <header class="intro-head">
       <h1>智能评论筛选 <em>AI Comment Filter</em></h1>
-      <p class="intro-sub">直播间互动机制原型 · TikTok / 抖音</p>
+      <div class="intro-meta-row">
+        <p class="intro-sub">直播间互动机制原型 · 抖音</p>
+        <button class="logic-toggle border-glow-card" id="logicToggle" type="button"
+                aria-expanded="false" aria-controls="logicPanel">
+          <span class="edge-light" aria-hidden="true"></span>
+          <span class="border-glow-inner">
+            <svg class="logic-toggle-icon" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M2.5 3.25h11L9.35 8v3.25l-2.7 1.5V8L2.5 3.25Z"></path>
+            </svg>
+            <span>筛选逻辑</span>
+            <svg class="logic-convert-icon" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M2.5 5h9"></path>
+              <path d="m9.25 2.75 2.25 2.25-2.25 2.25"></path>
+              <path d="M13.5 11h-9"></path>
+              <path d="m6.75 8.75-2.25 2.25 2.25 2.25"></path>
+            </svg>
+          </span>
+        </button>
+      </div>
     </header>
 
-    <div class="intro-steps">
-      <div class="intro-step">
-        <span class="idx">01</span>
-        <div class="body">
-          <h3>背景与问题</h3>
-          <p>进入赛事、游戏等高人气直播间后，用户往往有强烈的讨论和表达欲，但评论刷新过快，发言很快被淹没。用户难以看清彼此的评论和形成持续的讨论与互动，用户状态相对孤立。</p>
-        </div>
+    <div class="intro-content">
+      <div class="intro-overview">
+        <dl class="intro-context">
+          <div class="intro-context-row">
+            <dt>背景</dt>
+            <dd>在高人气赛事 / 游戏直播中，评论不仅承载情绪互动，也包含操作分析、战术判断和观点讨论，是用户理解内容、参与直播的重要方式。</dd>
+          </div>
+          <div class="intro-context-row">
+            <dt>痛点</dt>
+            <dd>高速刷新的公屏中，大量低信息和无关内容容易淹没有价值的讨论，用户难以快速找到真正值得看、或与自己相关的信息。</dd>
+          </div>
+          <div class="intro-context-row">
+            <dt>用户</dt>
+            <dd>会主动阅读评论，希望借助他人分析和观点理解比赛的赛事 / 游戏直播观众。</dd>
+          </div>
+        </dl>
+
+        <section class="intro-idea">
+          <span class="intro-idea-label">Idea</span>
+          <h2>两种筛选目标，对应不同阅读需求</h2>
+          <p>增加「筛选评论」能力：用<b>精彩评论</b>优先呈现更有信息价值的讨论；用<b>为你精选</b>结合用户的发言、互动与关注内容，筛出与个人更相关的信息。同时持续突出用户自己的评论，帮助其在高速公屏中快速确认发言状态。</p>
+          <div class="intro-metrics" aria-label="核心衡量指标">
+            <span class="intro-metrics-label">衡量指标</span>
+            <div class="intro-metrics-list">
+              <div class="intro-metric">
+                <strong>筛选开启率</strong>
+                <span>用户愿不愿意用</span>
+              </div>
+              <div class="intro-metric">
+                <strong>筛选后互动率</strong>
+                <span>看到了之后有没有更愿意参与</span>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
-      <div class="intro-step">
-        <span class="idx">02</span>
-        <div class="body">
-          <h3>用户</h3>
-          <p>高热直播间中，有讨论意愿，却因公屏过快而放弃表达的普通观众。</p>
-        </div>
-      </div>
+      <section class="logic-panel" id="logicPanel" aria-hidden="true">
+        <div class="logic-panel-inner">
+          <header class="logic-head">
+            <p class="logic-kicker">筛选逻辑</p>
+            <h2>两种互斥模式，两种筛选目标</h2>
+            <p>用户一次只进入一种模式，分别回答「什么值得看」和「什么值得我看」。</p>
+          </header>
 
-      <div class="intro-step">
-        <span class="idx">03</span>
-        <div class="body">
-          <h3>Idea</h3>
-          <p>不离开公屏，用轻量 AI 筛选降低噪音，让有观点、有上下文的实时评论更容易被看见。</p>
-        </div>
-      </div>
+          <div class="logic-flow">
+            <section class="logic-mode">
+              <div class="logic-mode-content">
+                <div class="logic-mode-head">
+                  <span class="logic-index">模式 A</span>
+                  <h3>精彩评论</h3>
+                  <span class="logic-question">什么值得看</span>
+                </div>
+                <p class="logic-copy">从实时公屏中优先识别：</p>
+                <ul>
+                  <li>与当前直播内容相关</li>
+                  <li>有明确观点或判断</li>
+                  <li>包含分析、解释或信息增量</li>
+                </ul>
+                <p class="logic-note">降低低信息、无关和纯情绪内容的展示优先级。</p>
+              </div>
+            </section>
 
+            <div class="logic-or"><span>或</span></div>
 
-      <div class="intro-step">
-        <span class="idx">04</span>
-        <div class="body">
-          <h3>Demo 三幕</h3>
-          <p><b>表达</b>：在高速公屏发送一句观点，自己的评论持续高亮。</p>
-          <p><b>筛选</b>：点击 <span class="intro-quote">✦ 只看精彩评论</span>，低信息评论从原公屏淡出。</p>
-          <p><b>个性化</b>：切换到 <span class="intro-quote">为你精选⌄</span>，继续调整关注内容，或随时恢复全部评论。</p>
+            <section class="logic-mode">
+              <div class="logic-mode-content">
+                <div class="logic-mode-head">
+                  <span class="logic-index">模式 B</span>
+                  <h3>为你精选</h3>
+                  <span class="logic-question">什么值得我看</span>
+                </div>
+                <p class="logic-copy">从实时公屏中，进一步结合用户当前的：</p>
+                <ul>
+                  <li>发言内容</li>
+                  <li>互动行为</li>
+                  <li>主动关注 Tag</li>
+                </ul>
+                <p class="logic-note">判断评论与用户当下兴趣的相关性，优先展示更匹配的讨论。</p>
+              </div>
+            </section>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   </aside>
-  <div class="phone-frame">
+  <div class="phone-frame" id="phoneFrame">
   <div class="phone">
     <div class="screen" id="screen">
 
@@ -239,7 +307,7 @@
                   </div>
                 </div>
               </div>
-              <p class="filter-desc" id="personalDesc" hidden>开启后，公屏将优先展示根据你最近的发言和互动自动判断关注内容，你可以随时在该面板内编辑调整。</p>
+              <p class="filter-desc" id="personalDesc" hidden>开启后，公屏将优先展示与你的发言更相关的评论，你可以随时在该面板内编辑调整。</p>
             </div>
           </div>
 
@@ -250,6 +318,9 @@
 
     </div>
   </div>
+  <div class="step-pointer is-right" id="stepPointer" aria-hidden="true">
+    <span class="step-pointer-tip"></span>
+  </div>
   </div>
 
   <!-- 右侧动态体验引导层：随交互状态自动推进，只显示当前步 -->
@@ -259,7 +330,7 @@
       <div class="guide-progress">
         <span class="gp-cur" id="guideCur">01</span>
         <span class="gp-sep">/</span>
-        <span class="gp-total" id="guideTotal">05</span>
+        <span class="gp-total" id="guideTotal">06</span>
       </div>
     </header>
 
@@ -284,6 +355,7 @@
   </aside>
 </div>
 
+<script src="BorderGlow.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
