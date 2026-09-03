@@ -21,6 +21,8 @@
                 aria-selected="true" aria-controls="projectPanel">项目说明</button>
         <button class="intro-tab" id="logicTab" type="button" role="tab"
                 aria-selected="false" aria-controls="logicPanel" tabindex="-1">筛选逻辑</button>
+        <button class="intro-tab" id="metricsTab" type="button" role="tab"
+                aria-selected="false" aria-controls="metricsPanel" tabindex="-1">衡量指标</button>
       </div>
     </header>
 
@@ -43,28 +45,14 @@
 
         <section class="intro-idea">
           <span class="intro-idea-label">Idea</span>
-          <h2>增加优质评论筛选能力</h2>
+          <h2>增加优质评论智能筛选能力</h2>
           <p>包含两种筛选模式，用<b> 精彩评论 </b>呈现通用的更有信息价值的讨论；用<b> 为你精选 </b>结合用户的发言、互动与关注内容，筛出与个人强相关的信息。同时持续突出用户自己的评论，帮助其在高速公屏中快速确认发言状态。</p>
-          <div class="intro-metrics" aria-label="核心衡量指标">
-            <span class="intro-metrics-label">衡量指标</span>
-            <div class="intro-metrics-list">
-              <div class="intro-metric">
-                <strong>筛选开启率</strong>
-                <span>用户愿不愿意用</span>
-              </div>
-              <div class="intro-metric">
-                <strong>筛选后互动率</strong>
-                <span>看到了之后有没有更愿意参与</span>
-              </div>
-            </div>
-          </div>
         </section>
       </div>
 
       <section class="logic-panel" id="logicPanel" role="tabpanel" aria-labelledby="logicTab" aria-hidden="true">
         <div class="logic-panel-inner">
           <header class="logic-head">
-            <p class="logic-kicker">筛选逻辑</p>
             <h2>两种互斥模式，两种筛选目标</h2>
             <p>用户一次只进入一种模式，分别回答「什么值得看」和「什么值得我看」。</p>
           </header>
@@ -105,6 +93,25 @@
                 <p class="logic-note">判断评论与用户当下兴趣的相关性，优先展示更匹配的讨论。</p>
               </div>
             </section>
+          </div>
+        </div>
+      </section>
+
+      <section class="metrics-panel" id="metricsPanel" role="tabpanel" aria-labelledby="metricsTab" aria-hidden="true">
+        <div class="metrics-panel-inner">
+          <div class="intro-metric">
+            <span class="metric-index" aria-hidden="true">01</span>
+            <div class="metric-copy">
+              <strong>筛选开启率</strong>
+              <span>用户愿不愿意用</span>
+            </div>
+          </div>
+          <div class="intro-metric">
+            <span class="metric-index" aria-hidden="true">02</span>
+            <div class="metric-copy">
+              <strong>筛选后互动率</strong>
+              <span>看到了之后有没有更愿意参与</span>
+            </div>
           </div>
         </div>
       </section>
@@ -290,8 +297,14 @@
                 </div>
                 <div class="filter-topic-area" id="filterTopicArea">
                   <span class="filter-sub-label">当前关注</span>
-                  <div class="topic-list" id="topicList"></div>
-                  <div class="topic-input-wrap">
+                  <div class="topic-ai-status" id="topicAiStatus" role="status" aria-live="polite">
+                    <span class="topic-ai-icon" aria-hidden="true">✦</span>
+                    <span id="topicAiStatusText">暂无关注内容，开启后 AI 自动识别</span>
+                  </div>
+                  <div class="topic-recognized" id="topicRecognized" hidden>
+                    <div class="topic-list" id="topicList"></div>
+                  </div>
+                  <div class="topic-input-wrap" id="topicInputWrap">
                     <input id="topicInput" type="text" autocomplete="off" maxlength="12" placeholder="例如：选手名、装备、打野、阵容">
                     <button id="addTopic" type="button">添加</button>
                   </div>

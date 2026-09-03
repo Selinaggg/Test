@@ -258,7 +258,11 @@ const el = {
   filterScrim: $('filterScrim'),
   filterScroll: $('filterScroll'),
   filterTopicArea: $('filterTopicArea'),
+  topicAiStatus: $('topicAiStatus'),
+  topicAiStatusText: $('topicAiStatusText'),
+  topicRecognized: $('topicRecognized'),
   topicList: $('topicList'),
+  topicInputWrap: $('topicInputWrap'),
   topicInput: $('topicInput'),
   addTopic: $('addTopic'),
   toast:     $('toast'),
@@ -286,6 +290,10 @@ const state = {
   guideTimer: null,
   highlightDescOpen: false,
   personalDescOpen: false,
+  topicRecognition: 'idle',
+  topicRecognitionTimer: null,
+  topicRecognitionEndHandler: null,
+  topicRevealEndHandler: null,
   topicScrollRaf: 0,
   crowdTimer: null,
   filterResultTimer: null,
@@ -882,6 +890,7 @@ function scheduleFilterGuide() {
 function updateFilterControl() {
   const highlightOn = state.mode === 'highlight';
   const personalOn = state.mode === 'for-you';
+  const topicsReady = personalOn && state.topicRecognition === 'ready';
   el.highlightToggle.classList.toggle('is-active', highlightOn);
   el.highlightSwitch.classList.toggle('is-on', highlightOn);
   el.personalToggle.classList.toggle('is-active', personalOn);
@@ -891,26 +900,67 @@ function updateFilterControl() {
   el.personalToggle.setAttribute('aria-pressed', String(personalOn));
   el.personalSwitch.setAttribute('aria-pressed', String(personalOn));
   el.screen.classList.toggle('filter-active', state.mode !== 'all');
-  el.filterTopicArea.classList.toggle('is-disabled', !personalOn);
-  el.topicInput.disabled = !personalOn;
-  el.addTopic.disabled = !personalOn;
+  el.filterTopicArea.classList.toggle('is-disabled', !topicsReady);
+  el.topicInput.disabled = !topicsReady;
+  el.addTopic.disabled = !topicsReady;
   el.topicList.querySelectorAll('button').forEach(button => {
-    button.disabled = !personalOn;
+    button.disabled = !topicsReady;
   });
   if (!personalOn) {
     closeTopicKeyboard();
   }
+  renderTopicPresentation();
 }
 
 function setFilterMode(nextMode, { animate = true } = {}) {
   const previousMode = state.mode;
   if (previousMode === nextMode) nextMode = 'all';
+  clearTimeout(state.topicRecognitionTimer);
+  state.topicRecognitionTimer = null;
+  if (state.topicRecognitionEndHandler) {
+    el.topicAiStatusText.removeEventListener('animationend', state.topicRecognitionEndHandler);
+    state.topicRecognitionEndHandler = null;
+  }
   state.mode = nextMode;
+  state.topicRecognition = nextMode === 'for-you' ? 'recognizing' : 'idle';
   if (nextMode === 'all') clearFilterReflowOffsets();
   updateFilterControl();
   renderTopics();
   if (nextMode === 'highlight') Guide.reach('highlight');
-  if (nextMode === 'for-you') Guide.reach('personalize');
+  if (nextMode === 'for-you') {
+    const finishRecognition = () => {
+      if (state.mode !== 'for-you') return;
+      state.topicRecognitionTimer = null;
+      state.topicRecognition = 'ready';
+      renderTopics();
+      renderTopicPresentation(() => {
+        if (state.mode !== 'for-you') return;
+        if (animate && previousMode !== nextMode) {
+          runFilterAnimation(updateFilterControl, nextMode);
+        }
+      });
+      Guide.reach('personalize');
+      Guide.refreshPointer(260);
+    };
+
+    if (animate && previousMode !== nextMode) {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        requestAnimationFrame(finishRecognition);
+      } else {
+        const finishRecognitionSweep = event => {
+          if (event.target !== el.topicAiStatusText || event.animationName !== 'topicAiTextSweep') return;
+          el.topicAiStatusText.removeEventListener('animationend', finishRecognitionSweep);
+          state.topicRecognitionEndHandler = null;
+          finishRecognition();
+        };
+        state.topicRecognitionEndHandler = finishRecognitionSweep;
+        el.topicAiStatusText.addEventListener('animationend', finishRecognitionSweep);
+      }
+    } else {
+      finishRecognition();
+    }
+    return;
+  }
   if (nextMode !== 'all' && animate && previousMode !== nextMode) {
     runFilterAnimation(updateFilterControl, nextMode);
   }
@@ -1060,12 +1110,86 @@ function renderTopics() {
     remove.addEventListener('click', () => {
       state.userTopics = state.userTopics.filter(item => item !== topic);
       renderTopics();
+      renderTopicPresentation();
       Guide.reach('topics');
       updateTopicFilterInPlace();
     });
     chip.appendChild(remove);
     el.topicList.appendChild(chip);
   });
+}
+
+function renderTopicPresentation(onRevealComplete) {
+  if (!el.topicAiStatus || !el.topicAiStatusText || !el.topicRecognized) return;
+  const personalOn = state.mode === 'for-you';
+  const ready = personalOn && state.topicRecognition === 'ready';
+  const recognizing = personalOn && state.topicRecognition === 'recognizing';
+  const hasTopics = state.userTopics.length > 0;
+  const shouldReveal = ready && hasTopics && el.topicRecognized.hidden;
+  const inputTopBeforeReveal = shouldReveal && el.topicInputWrap
+    ? el.topicInputWrap.getBoundingClientRect().top
+    : 0;
+
+  el.filterTopicArea.classList.toggle('is-disabled', !ready);
+  el.topicInput.disabled = !ready;
+  el.addTopic.disabled = !ready;
+  el.topicList.querySelectorAll('button').forEach(button => {
+    button.disabled = !ready;
+  });
+  el.topicAiStatusText.textContent = recognizing
+    ? '正在根据你最近的发言和互动识别关注内容'
+    : ready
+      ? hasTopics
+        ? '根据你最近的发言和互动识别'
+        : '暂无关注内容，可手动添加或根据后续互动自动更新'
+      : '暂无关注内容，开启后 AI 自动识别';
+  el.topicAiStatus.hidden = false;
+  el.topicAiStatus.classList.toggle('is-idle', !personalOn);
+  el.topicAiStatus.classList.toggle('is-recognizing', recognizing);
+  el.topicRecognized.hidden = !ready || !hasTopics;
+  if (!ready) {
+    if (state.topicRevealEndHandler) {
+      el.topicRecognized.removeEventListener('animationend', state.topicRevealEndHandler);
+      state.topicRevealEndHandler = null;
+    }
+    el.topicRecognized.classList.remove('is-revealing');
+    if (el.topicInputWrap) el.topicInputWrap.classList.remove('is-topic-shifting');
+    return;
+  }
+
+  if (!shouldReveal) {
+    if (typeof onRevealComplete === 'function') requestAnimationFrame(onRevealComplete);
+    return;
+  }
+
+  el.topicRecognized.classList.remove('is-revealing');
+  void el.topicRecognized.offsetWidth;
+  if (el.topicInputWrap) {
+    const inputTopAfterReveal = el.topicInputWrap.getBoundingClientRect().top;
+    el.topicInputWrap.style.setProperty('--topic-input-shift', `${inputTopBeforeReveal - inputTopAfterReveal}px`);
+    el.topicInputWrap.classList.remove('is-topic-shifting');
+    void el.topicInputWrap.offsetWidth;
+    el.topicInputWrap.classList.add('is-topic-shifting');
+  }
+  if (typeof onRevealComplete === 'function') {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      requestAnimationFrame(onRevealComplete);
+    } else {
+      const finishReveal = event => {
+        const topicList = el.topicRecognized.querySelector('.topic-list');
+        if (event.target !== topicList || event.animationName !== 'topicRecognizedItemIn') return;
+        el.topicRecognized.removeEventListener('animationend', finishReveal);
+        state.topicRevealEndHandler = null;
+        onRevealComplete();
+      };
+      if (state.topicRevealEndHandler) {
+        el.topicRecognized.removeEventListener('animationend', state.topicRevealEndHandler);
+      }
+      state.topicRevealEndHandler = finishReveal;
+      el.topicRecognized.addEventListener('animationend', finishReveal);
+    }
+  }
+  el.topicRecognized.classList.add('is-revealing');
 }
 function openFilterSettings() {
   closeTyping();
@@ -1111,6 +1235,7 @@ function addTopic() {
   if (added) state.userTopics.push(topic);
   el.topicInput.value = '';
   renderTopics();
+  renderTopicPresentation();
   if (added) {
     Guide.reach('topics');
     updateTopicFilterInPlace();
@@ -1201,8 +1326,8 @@ const Guide = (() => {
   const STEPS = [
     {
       id: 'comment',
-      title: '发一条观点',
-      desc: '发送后持续高亮自己的评论，感知到自己是否成功发言',
+      title: '先发一条观点',
+      desc: '发送后该评论持续高亮，感知到自己是否成功发言',
       hint: '',
       target: '#dockInput',
       side: 'bottom'
@@ -1234,7 +1359,7 @@ const Guide = (() => {
     {
       id: 'topics',
       title: '调整关注内容',
-      desc: '添加或移除关注词，观察公屏如何再次更新。',
+      desc: '可以添加或移除关注词，观察公屏如何再次更新。',
       hint: '',
       target: '#topicInput',
       side: 'right'
@@ -1259,25 +1384,29 @@ const Guide = (() => {
   function positionPointer(step = STEPS[idx]) {
     if (!el.stepPointer || !el.phoneFrame || !step || finished) return;
     let target = document.querySelector(step.target);
-    if (step.id === 'comment' && el.screen.classList.contains('kb-open')) target = el.liveInput;
+    const pointsToKeyboardSend = step.id === 'comment' && el.screen.classList.contains('kb-open');
+    if (pointsToKeyboardSend) target = el.liveSend;
     if (!target) return;
 
     const frameRect = el.phoneFrame.getBoundingClientRect();
     const targetRect = target.getBoundingClientRect();
     const targetX = targetRect.left + targetRect.width * .5 - frameRect.left;
     const targetY = targetRect.top + targetRect.height * (step.targetY ?? .5) - frameRect.top;
-    const isBottom = step.side === 'bottom';
-    const x = isBottom
+    const pointerSide = pointsToKeyboardSend ? 'right' : step.side;
+    const isBottom = pointerSide === 'bottom';
+    const x = pointsToKeyboardSend
+      ? frameRect.width + 20
+      : isBottom
       ? Math.max(18, Math.min(frameRect.width - 18, targetX))
-      : step.side === 'left' ? -15 : frameRect.width + 15;
+      : pointerSide === 'left' ? -15 : frameRect.width + 15;
     const y = isBottom
       ? frameRect.height + 15
       : Math.max(18, Math.min(frameRect.height - 18, targetY));
 
     el.stepPointer.style.setProperty('--pointer-x', `${x}px`);
     el.stepPointer.style.setProperty('--pointer-y', `${y}px`);
-    el.stepPointer.classList.toggle('is-left', step.side === 'left');
-    el.stepPointer.classList.toggle('is-right', step.side === 'right');
+    el.stepPointer.classList.toggle('is-left', pointerSide === 'left');
+    el.stepPointer.classList.toggle('is-right', pointerSide === 'right');
     el.stepPointer.classList.toggle('is-bottom', isBottom);
   }
 
@@ -1382,32 +1511,41 @@ el.guideRestart.addEventListener('click', () => {
 const logicExplainer = $('logicExplainer');
 const projectTab = $('projectTab');
 const logicTab = $('logicTab');
+const metricsTab = $('metricsTab');
 const projectPanel = $('projectPanel');
 const logicPanel = $('logicPanel');
+const metricsPanel = $('metricsPanel');
 
-function setLogicExplainer(open) {
-  if (!logicExplainer || !projectTab || !logicTab || !projectPanel || !logicPanel) return;
-  logicExplainer.classList.toggle('is-open', open);
-  projectTab.classList.toggle('is-active', !open);
-  logicTab.classList.toggle('is-active', open);
-  projectTab.setAttribute('aria-selected', String(!open));
-  logicTab.setAttribute('aria-selected', String(open));
-  projectTab.tabIndex = open ? -1 : 0;
-  logicTab.tabIndex = open ? 0 : -1;
-  projectPanel.setAttribute('aria-hidden', String(open));
-  logicPanel.setAttribute('aria-hidden', String(!open));
+function setIntroPanel(panelName) {
+  const tabs = [projectTab, logicTab, metricsTab];
+  const panels = [projectPanel, logicPanel, metricsPanel];
+  if (!logicExplainer || tabs.some(tab => !tab) || panels.some(panel => !panel)) return;
+
+  const activeIndex = panelName === 'logic' ? 1 : panelName === 'metrics' ? 2 : 0;
+  logicExplainer.classList.toggle('is-logic', activeIndex === 1);
+  logicExplainer.classList.toggle('is-metrics', activeIndex === 2);
+
+  tabs.forEach((tab, index) => {
+    const active = index === activeIndex;
+    tab.classList.toggle('is-active', active);
+    tab.setAttribute('aria-selected', String(active));
+    tab.tabIndex = active ? 0 : -1;
+    panels[index].setAttribute('aria-hidden', String(!active));
+  });
 }
 
-if (projectTab && logicTab) {
-  projectTab.addEventListener('click', () => setLogicExplainer(false));
-  logicTab.addEventListener('click', () => setLogicExplainer(true));
-  [projectTab, logicTab].forEach(tab => {
+if (projectTab && logicTab && metricsTab) {
+  const introTabs = [projectTab, logicTab, metricsTab];
+  const panelNames = ['project', 'logic', 'metrics'];
+  introTabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => setIntroPanel(panelNames[index]));
     tab.addEventListener('keydown', event => {
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
       event.preventDefault();
-      const showLogic = tab === projectTab;
-      setLogicExplainer(showLogic);
-      (showLogic ? logicTab : projectTab).focus();
+      const direction = event.key === 'ArrowRight' ? 1 : -1;
+      const nextIndex = (index + direction + introTabs.length) % introTabs.length;
+      setIntroPanel(panelNames[nextIndex]);
+      introTabs[nextIndex].focus();
     });
   });
 }
