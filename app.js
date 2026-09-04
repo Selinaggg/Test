@@ -900,6 +900,7 @@ function updateFilterControl() {
   el.personalToggle.setAttribute('aria-pressed', String(personalOn));
   el.personalSwitch.setAttribute('aria-pressed', String(personalOn));
   el.screen.classList.toggle('filter-active', state.mode !== 'all');
+  el.openFilter.classList.toggle('is-active', state.mode !== 'all');
   el.filterTopicArea.classList.toggle('is-disabled', !topicsReady);
   el.topicInput.disabled = !topicsReady;
   el.addTopic.disabled = !topicsReady;
@@ -1207,6 +1208,12 @@ function openFilterSettings() {
 function closeFilterSettings(returnToLive = false) {
   const wasOpen = state.settingsOpen;
   state.settingsOpen = false;
+  state.highlightDescOpen = false;
+  state.personalDescOpen = false;
+  el.highlightDesc.hidden = true;
+  el.personalDesc.hidden = true;
+  el.highlightInfo.setAttribute('aria-expanded', 'false');
+  el.personalInfo.setAttribute('aria-expanded', 'false');
   el.screen.classList.remove('filter-settings-open', 'topic-kb-open');
   el.filterSheet.setAttribute('aria-hidden', 'true');
   el.keyboard.setAttribute('aria-hidden', 'true');
