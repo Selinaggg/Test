@@ -1009,7 +1009,7 @@ function closeMore() {
   el.screen.classList.remove('more-open');
   el.moreSheet.setAttribute('aria-hidden', 'true');
 }
-el.openMore.addEventListener('click', openMore);
+
 if (el.moreCancel) el.moreCancel.addEventListener('click', closeMore);
 el.scrim.addEventListener('click', closeMore);
 el.moreGrab.addEventListener('click', closeMore);
