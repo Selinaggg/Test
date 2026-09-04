@@ -1375,7 +1375,7 @@ const Guide = (() => {
       id: 'return-live',
       title: '返回直播间，查看筛选结果',
       desc: '收起面板回到公屏。无关干扰已经淡出，评论区只保留与你当前关注更相关的讨论。',
-      hint: '› 点击面板外的直播画面',
+      hint: '点击面板外的直播画面',
       target: '#screen',
       targetY: .27,
       side: 'right'
